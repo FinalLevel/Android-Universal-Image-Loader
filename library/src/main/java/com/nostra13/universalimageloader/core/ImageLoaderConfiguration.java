@@ -75,6 +75,8 @@ public final class ImageLoaderConfiguration {
 	final ImageDownloader networkDeniedDownloader;
 	final ImageDownloader slowNetworkDownloader;
 
+	final boolean skipUriQueryParameters;
+
 	private ImageLoaderConfiguration(final Builder builder) {
 		resources = builder.context.getResources();
 		maxImageWidthForMemoryCache = builder.maxImageWidthForMemoryCache;
@@ -98,6 +100,8 @@ public final class ImageLoaderConfiguration {
 
 		networkDeniedDownloader = new NetworkDeniedImageDownloader(downloader);
 		slowNetworkDownloader = new SlowNetworkImageDownloader(downloader);
+
+		skipUriQueryParameters = builder._skipUriQueryParameters;
 
 		L.writeDebugLogs(builder.writeLogs);
 	}
@@ -191,6 +195,8 @@ public final class ImageLoaderConfiguration {
 		private DisplayImageOptions defaultDisplayImageOptions = null;
 
 		private boolean writeLogs = false;
+
+		private boolean _skipUriQueryParameters = false;
 
 		public Builder(Context context) {
 			this.context = context.getApplicationContext();
@@ -554,6 +560,14 @@ public final class ImageLoaderConfiguration {
 			return this;
 		}
 
+		/**
+		 * Skip Uri Query Parameters when determine cache key
+		 */
+		public Builder skipUriQueryParameters() {
+			this._skipUriQueryParameters = true;
+			return this;
+		}
+
 		/** Builds configured {@link ImageLoaderConfiguration} object */
 		public ImageLoaderConfiguration build() {
 			initEmptyFieldsWithDefaultValues();
@@ -575,7 +589,7 @@ public final class ImageLoaderConfiguration {
 			}
 			if (diskCache == null) {
 				if (diskCacheFileNameGenerator == null) {
-					diskCacheFileNameGenerator = DefaultConfigurationFactory.createFileNameGenerator();
+					diskCacheFileNameGenerator = DefaultConfigurationFactory.createFileNameGenerator(_skipUriQueryParameters);
 				}
 				diskCache = DefaultConfigurationFactory
 						.createDiskCache(context, diskCacheFileNameGenerator, diskCacheSize, diskCacheFileCount);

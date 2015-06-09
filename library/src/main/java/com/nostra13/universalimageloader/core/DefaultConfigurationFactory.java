@@ -77,6 +77,27 @@ public class DefaultConfigurationFactory {
 		return new HashCodeFileNameGenerator();
 	}
 
+	public static FileNameGenerator createFileNameGenerator(boolean skipUriQueryParameters)
+	{
+		if (!skipUriQueryParameters) {
+			return createFileNameGenerator();
+		}
+
+		return new FileNameGenerator()
+		{
+			@Override
+			public String generate(String imageUri)
+			{
+				final int i = imageUri.indexOf('?');
+				if (i < 0) {
+					return String.valueOf(imageUri.hashCode());
+				} else {
+					return String.valueOf(imageUri.substring(0, i).hashCode());
+				}
+			}
+		};
+	}
+
 	/**
 	 * Creates default implementation of {@link DiskCache} depends on incoming parameters
 	 */

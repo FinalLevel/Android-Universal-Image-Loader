@@ -229,7 +229,18 @@ public class ImageLoader {
 		}
 
 		ImageSize targetSize = ImageSizeUtils.defineTargetSizeForView(imageAware, configuration.getMaxImageSize());
-		String memoryCacheKey = MemoryCacheUtils.generateKey(uri, targetSize);
+		final String keyUri;
+		if (configuration.skipUriQueryParameters) {
+			final int i = uri.indexOf('?');
+			if (i < 0) {
+				keyUri = uri;
+			} else {
+				keyUri = uri.substring(0, i);
+			}
+		} else {
+			keyUri = uri;
+		}
+		String memoryCacheKey = MemoryCacheUtils.generateKey(keyUri, targetSize);
 		engine.prepareDisplayTaskFor(imageAware, memoryCacheKey);
 
 		listener.onLoadingStarted(uri, imageAware.getWrappedView());
@@ -260,7 +271,7 @@ public class ImageLoader {
 			}
 
 			ImageLoadingInfo imageLoadingInfo = new ImageLoadingInfo(uri, imageAware, targetSize, memoryCacheKey,
-					options, listener, progressListener, engine.getLockForUri(uri));
+					options, listener, progressListener, engine.getLockForUri(keyUri));
 			LoadAndDisplayImageTask displayTask = new LoadAndDisplayImageTask(engine, imageLoadingInfo,
 					defineHandler(options));
 			if (options.isSyncLoading()) {
